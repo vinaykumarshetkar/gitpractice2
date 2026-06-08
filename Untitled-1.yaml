@@ -1,0 +1,32 @@
+---
+- name: Install Java, Tomcat and Deploy WAR
+  hosts: server1
+  become: yes
+
+  vars:
+    java_version: openjdk-17-jdk
+
+  vars_files:
+    - /home/vinay/Desktop/ansible/task05/ansible-vars.yml
+
+  tasks:
+
+    - name: Copy Amazon.war to Tomcat webapps
+      copy:
+        src: /home/vinay/Desktop/ansible/my-webapp.war
+        dest: /opt/tomcat/apache-tomcat-9.0.118/webapps/
+      notify: Start_Tomcat
+      changed_when: true
+
+    - name: Give execute permission to startup.sh
+      file:
+        path: /opt/tomcat/apache-tomcat-9.0.118/bin/startup.sh
+        mode: '0755'
+
+  handlers:
+
+    - name: Start_Tomcat
+      shell: nohup /opt/tomcat/apache-tomcat-9.0.118/bin/startup.sh &
+      async: 10
+      poll: 0
+      ignore_errors: yes
